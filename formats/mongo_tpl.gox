@@ -1,0 +1,80 @@
+MsgHeader = {
+	messageLength int32
+	requestID     int32
+	responseTo    int32
+	opCode        int32
+}
+
+OP_UPDATE = {
+	ZERO               int32
+	fullCollectionName cstring
+	flags              int32
+	selector           document
+	update             document
+}
+
+OP_INSERT = {
+	flags              int32
+	fullCollectionName cstring
+	documents          *document
+}
+
+OP_QUERY = {
+	flags                int32
+	fullCollectionName   cstring
+	numberToSkip         int32
+	numberToReturn       int32
+	query                document
+	returnFieldsSelector ?document
+}
+
+OP_GET_MORE = {
+	ZERO               int32
+	fullCollectionName cstring
+	numberToReturn     int32
+	cursorID           int64
+}
+
+OP_DELETE = {
+	ZERO               int32
+	fullCollectionName cstring
+	flags              int32
+	selector           document
+}
+
+OP_KILL_CURSORS = {
+	ZERO              int32
+	numberOfCursorIDs int32
+	cursorIDs         *int64
+}
+
+OP_MSG = {
+	message cstring
+}
+
+OP_REPLY = {
+	responseFlags  int32
+	cursorID       int64
+	startingFrom   int32
+	numberReturned int32
+	documents      *document
+}
+
+Message = {
+	header MsgHeader
+	body   [header.messageLength - sizeof(MsgHeader)]byte
+
+	match body, switch header.opCode {
+		case 1:    OP_REPLY
+		case 1000: OP_MSG
+		case 2001: OP_UPDATE
+		case 2002: OP_INSERT
+		case 2004: OP_QUERY
+		case 2005: OP_GET_MORE
+		case 2006: OP_DELETE
+		case 2007: OP_KILL_CURSORS
+		default:
+	}
+}
+
+doc = *Message

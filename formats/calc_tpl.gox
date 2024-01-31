@@ -1,0 +1,11 @@
+term = factor *('*' factor/mul | '/' factor/quo | '%' factor/mod)
+
+doc = term *('+' term/add | '-' term/sub)
+
+factor =
+	FLOAT/push |
+	'-' factor/neg |
+	'(' doc ')' |
+	(IDENT '(' doc %= ','/ARITY ')')/call |
+	IDENT/ident |
+	'+' factor
